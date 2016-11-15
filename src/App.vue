@@ -81,16 +81,15 @@
     </div>
     <div class="map-panel">
       <gmap-map
-          :center="center"
-          :zoom="zoom"
+          :center.sync="center"
+          :zoom.sync="zoom"
           :map-type-id="mapType"
           :options="{styles: mapStyles, scrollwheel: scrollwheel}"
           @g-rightclick="mapRclicked"
           @g-drag="drag++"
           @g-click="mapClickedCount++"
-
-          @g-zoom_changed="update('zoom', $event)"
           @g-center_changed="update('center', $event)"
+          @g-zoom_changed="update('zoom', $event)"
           @g-maptypeid_changed="update('mapType', $event)"
           @g-bounds_changed="update('bounds', $event)"
           >
@@ -100,9 +99,9 @@
           >
             <gmap-marker
               v-if="m.enabled"
-              :position="m.position"
+              :position.sync="m.position"
               :opacity="m.opacity"
-              :draggable="m.draggable"
+              :draggable.sync="m.draggable"
               @g-click="m.clicked++"
               @g-rightclick="m.rightClicked++"
               @g-dragend="m.dragended++"
@@ -121,9 +120,9 @@
           <div>
             <gmap-marker
             v-if="m.enabled"
-            :position="m.position"
+            :position.sync="m.position"
             :opacity="m.opacity"
-            :draggable="m.draggable"
+            :draggable.sync="m.draggable"
             @g-click="m.clicked++"
             @g-rightclick="m.rightClicked++"
             @g-dragend="m.dragended++"
@@ -138,7 +137,7 @@
           </div>
 
           <gmap-info-window
-          :position="center"
+          :position.sync="center"
           :opened.sync="ifw"
           >
           To show you the bindings are working I will stay on the center of the screen whatever you do :)
@@ -148,19 +147,10 @@
           </gmap-info-window>
 
           <gmap-info-window
-          :position="center"
+          :position.sync="center"
           :opened.sync="ifw2"
           :content="ifw2text"
           ></gmap-info-window>
-
-          <gmap-circle v-if="displayCircle" :bounds="circleBounds"
-                :center="center" :radius="100000"
-                :options="{editable: true}"
-
-                @g-radius_changed="updateCircle('radius', $event)"
-                @g-bounds_changed="updateCircle('bounds', $event)"
-
-                ></gmap-circle>
         </gmap-map>
     </div>
   </div>
@@ -193,18 +183,20 @@ gmap-map {
 </style>
 <script>
 import { load, Marker, Map, InfoWindow, Circle, PlaceInput } from 'vue2-google-maps'
+
 load({
   key: 'AIzaSyBzlLYISGjL_ovJwAehh6ydhB56fCCpPQw',
   v: '3.24',
   libraries: ['places'],
   language: 'zh-CN'
 })
+
 export default {
   data: function data() {
     return {
       center: {
-        lat: 31.3,
-        lng: 121.4
+        lat: 29,
+        lng: 120
       },
       mapBounds: {},
       circleBounds: {},
@@ -224,6 +216,8 @@ export default {
       scrollwheel: true
     }
   },
+  ready: function() {
+  },
   computed: {
     activeMarkers() {
       if (this.markersEven) {
@@ -242,12 +236,13 @@ export default {
     // 获取当前位置
     geolocate: function geolocate() {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-          var geolocation = {
+        navigator.geolocation.getCurrentPosition(position => {
+          let geolocation = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           }
-          console.log(geolocation)
+          this.center = geolocation
+          console.log(this.center)
         })
       }
     },
